@@ -43,6 +43,8 @@ async def call_deepseek(prompt: str):
         return data["choices"][0]["message"]["content"]
 
 def parse_llm_response(llm_text: str):
+    llm_text = str(llm_text)  # защитный каст
+
     if "title" not in llm_text.lower():
         return MCPClarificationResponse(clarification_needed=llm_text)
 
