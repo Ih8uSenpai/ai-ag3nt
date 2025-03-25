@@ -1,12 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
 import React from "react";
-import { chats } from "../../../api/chats";
 import { useChatStore } from "../../../context/stores/chat";
 
 export const History = () => {
-  const data = chats;
   const setChat = useChatStore((state) => state.setChat);
-
+  const chats = useChatStore((state) => state.chats);
+  const addChat = useChatStore((state) => state.addChat);
+  const data = chats;
   return (
     <Box
       width={"25%"}
@@ -32,7 +32,12 @@ export const History = () => {
       >
         ДекомпоZилла
       </Typography>
-      <Button variant="contained" fullWidth sx={{ color: "black", bgcolor: 'text.secondary' }}>
+      <Button
+        variant="contained"
+        fullWidth
+        sx={{ color: "black", bgcolor: "text.secondary" }}
+        onClick={addChat}
+      >
         Новый чат
       </Button>
       <Box
@@ -48,8 +53,11 @@ export const History = () => {
           <Button
             variant="contained"
             fullWidth
-            onClick={() => setChat(index)}
+            onClick={() => {
+              setChat(index);
+            }}
             sx={{ color: "white", bgcolor: "background.default" }}
+            key={index}
           >
             {chat.label}
           </Button>

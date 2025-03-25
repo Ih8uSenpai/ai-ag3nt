@@ -4,7 +4,8 @@ import { SendHorizontal, Upload } from "lucide-react";
 import { useChatStore } from "../../../context/stores/chat";
 import { chats } from "../../../api/chats";
 import { useShallow } from "zustand/shallow";
-import React from "react";
+import React, { useState } from "react";
+import { useSendRequirement } from "../../../api/useSendRequirement";
 
 const UserMsg = ({ text }: { text: string }) => (
   <Typography
@@ -42,7 +43,10 @@ const Msg = ({
 
 const Messages = () => {
   const chat = useChatStore((state) => state.chat);
-  const data = chats[chat ?? 0];
+  const chats = useChatStore((state) => state.chats);
+  const data = chat ? chats[chat] : undefined;
+
+  if (!data) return "Новый чат";
 
   return (
     <Box flexGrow={1} width={"100%"} display={"flex"} flexDirection={"column"}>
@@ -54,10 +58,57 @@ const Messages = () => {
 };
 
 export const Chat = () => {
+  const [inputValue, setInputValue] = useState("");
+  const { mutate } = useSendRequirement();
+  const addMsg = useChatStore((state) => state.addMsg);
+  const chatIndex = useChatStore((state) => state.chat);
+
+  const handleSend = (e) => {
+    const input = inputValue;
+
+    const newMessage = {
+      owner: "user",
+      text: input,
+    } as const;
+
+    if (chatIndex) {
+      addMsg(chatIndex, newMessage);
+    }
+
+    if (input.trim()) {
+      mutate(
+        { text: input, sessionId: Math.random().toString() },
+        {
+          onSuccess: (res) => {
+            if ("clarification_needed" in res) {
+              console.log([
+                {
+                  sender: "agent" as const,
+                  content: res.clarification_needed,
+                },
+              ]);
+            } else if ("user_stories" in res) {
+              res.user_stories.forEach((s) => {
+                const res = {
+                  owner: "agent",
+                  text: `📝 ${s.title}: ${s.description}`,
+                } as const;
+                console.log(res);
+                if (chatIndex) {
+                  addMsg(chatIndex, res);
+                }
+              });
+            }
+          },
+        }
+      );
+    }
+  };
+
   return (
     <Box
       display={"flex"}
-      justifyContent={"center"}
+      justifyContent={"space-between"}
       alignItems={"center"}
       p={2}
       flexGrow={1}
@@ -68,6 +119,7 @@ export const Chat = () => {
     >
       <Messages />
       <TextField
+        onChange={(e) => setInputValue(e.target.value)}
         variant="outlined"
         placeholder="Запрос"
         sx={{ width: "50%", bgcolor: "background.paper", border: "none" }}
@@ -80,7 +132,11 @@ export const Chat = () => {
                 sx={{ display: "flex", columnGap: 2 }}
               >
                 <Upload cursor={"pointer"} color="white" />
-                <SendHorizontal cursor={"pointer"} color="white" />
+                <SendHorizontal
+                  cursor={"pointer"}
+                  color="white"
+                  onClick={handleSend}
+                />
               </InputAdornment>
             ),
           },
