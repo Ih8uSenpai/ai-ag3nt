@@ -1,3 +1,4 @@
+import { msMS } from "@mui/material/locale";
 import { create } from "zustand";
 
 type State = {
@@ -18,8 +19,8 @@ type Action = {
 };
 
 export const useChatStore = create<State & Action>()((set, get) => ({
-  chat: undefined,
-  chats: [],
+  chat: 0,
+  chats: [{ label: "Новый", msg: [] }],
   setChat: (index) => set(() => ({ chat: index })),
   addMsg: (index, msg) => {
     set(({ chats }) => ({
