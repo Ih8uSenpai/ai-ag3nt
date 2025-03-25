@@ -28,18 +28,16 @@ export const useSendRequirement = () => {
   return useMutation<MCPResponse, unknown, { text: string; sessionId: string }>(
     {
       mutationFn: async ({ text, sessionId }) => {
-        const req: MCPRequest = {
-          type: "user_requirement_decomposition",
-          input: { text },
-          context: { session_id: sessionId },
-        };
-        const res = await axios.post("http://localhost:8000/mcp", req, {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        });
+        // Отправляем данные с полем "task"
+        const req = { task: text, session_id: sessionId };
+
+        const res = await axios.post(
+          "http://127.0.0.1:5000/api/decompose",
+          req,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         return res.data;
       },
     }

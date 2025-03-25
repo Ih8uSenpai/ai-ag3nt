@@ -86,30 +86,26 @@ export const Chat = () => {
 
     if (input.trim()) {
       mutate(
-        { text: input, sessionId: Math.random().toString() },
+        { text: inputValue, sessionId: Math.random().toString() },
         {
           onSuccess: (res) => {
-            setInputValue("");
-            if ("clarification_needed" in res) {
-              if (chatIndex !== undefined) {
-                addMsg(chatIndex, {
-                  owner: "agent",
-                  text: res.clarification_needed,
-                });
-              }
-            } else if ("user_stories" in res) {
-              res.user_stories.forEach((s) => {
-                const res = {
-                  owner: "agent",
-                  text: `📝 ${s.title}: ${s.description}`,
-                } as const;
-                if (chatIndex !== undefined) {
-                  addMsg(chatIndex, res);
-                }
+            // Используем res.response, так как API возвращает именно это поле
+
+            if (chatIndex !== undefined) {
+              addMsg(chatIndex, {
+                owner: "agent",
+                text: (res as any).response,
               });
             }
           },
-          onSettled: () => {},
+          onError: () => {
+            if (chatIndex !== undefined) {
+              addMsg(chatIndex, {
+                owner: "agent",
+                text: "Ошибка при отправке сообщения",
+              });
+            }
+          },
         }
       );
     }
@@ -142,7 +138,7 @@ export const Chat = () => {
                 position="end"
                 sx={{ display: "flex", columnGap: 2 }}
               >
-                <Upload cursor={"pointer"} color="white" />
+                {/* <Upload cursor={"pointer"} color="white" /> */}
                 <SendHorizontal
                   cursor={"pointer"}
                   color="white"
