@@ -9,7 +9,7 @@ export const History = () => {
   const data = chats;
   return (
     <Box
-      width={"25%"}
+      minWidth={"25%"}
       height={"100%"}
       bgcolor={"background.paper"}
       sx={{
