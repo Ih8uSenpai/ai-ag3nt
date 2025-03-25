@@ -44,9 +44,11 @@ const Msg = ({
 const Messages = () => {
   const chat = useChatStore((state) => state.chat);
   const chats = useChatStore((state) => state.chats);
-  const data = chat ? chats[chat] : undefined;
+  const data = chat !== undefined ? chats[chat] : undefined;
 
   if (!data) return "Новый чат";
+
+  console.log({ chats });
 
   return (
     <Box flexGrow={1} width={"100%"} display={"flex"} flexDirection={"column"}>
@@ -63,7 +65,7 @@ export const Chat = () => {
   const addMsg = useChatStore((state) => state.addMsg);
   const chatIndex = useChatStore((state) => state.chat);
 
-  const handleSend = (e) => {
+  const handleSend = () => {
     const input = inputValue;
 
     const newMessage = {
@@ -71,7 +73,8 @@ export const Chat = () => {
       text: input,
     } as const;
 
-    if (chatIndex) {
+    console.log({ newMessage, chatIndex });
+    if (chatIndex !== undefined) {
       addMsg(chatIndex, newMessage);
     }
 
@@ -81,20 +84,19 @@ export const Chat = () => {
         {
           onSuccess: (res) => {
             if ("clarification_needed" in res) {
-              console.log([
-                {
-                  sender: "agent" as const,
-                  content: res.clarification_needed,
-                },
-              ]);
+              if (chatIndex !== undefined) {
+                addMsg(chatIndex, {
+                  owner: "agent",
+                  text: res.clarification_needed,
+                });
+              }
             } else if ("user_stories" in res) {
               res.user_stories.forEach((s) => {
                 const res = {
                   owner: "agent",
                   text: `📝 ${s.title}: ${s.description}`,
                 } as const;
-                console.log(res);
-                if (chatIndex) {
+                if (chatIndex !== undefined) {
                   addMsg(chatIndex, res);
                 }
               });
@@ -135,7 +137,7 @@ export const Chat = () => {
                 <SendHorizontal
                   cursor={"pointer"}
                   color="white"
-                  onClick={handleSend}
+                  onClick={() => handleSend()}
                 />
               </InputAdornment>
             ),
