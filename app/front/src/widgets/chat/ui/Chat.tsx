@@ -51,7 +51,13 @@ const Messages = () => {
   console.log({ chats });
 
   return (
-    <Box flexGrow={1} width={"100%"} display={"flex"} flexDirection={"column"}>
+    <Box
+      flexGrow={1}
+      width={"100%"}
+      display={"flex"}
+      flexDirection={"column"}
+      overflow={"scroll"}
+    >
       {data.msg.map((msg) => (
         <Msg message={msg as any} />
       ))}
@@ -83,6 +89,7 @@ export const Chat = () => {
         { text: input, sessionId: Math.random().toString() },
         {
           onSuccess: (res) => {
+            setInputValue("");
             if ("clarification_needed" in res) {
               if (chatIndex !== undefined) {
                 addMsg(chatIndex, {
@@ -102,6 +109,7 @@ export const Chat = () => {
               });
             }
           },
+          onSettled: () => {},
         }
       );
     }
@@ -121,6 +129,7 @@ export const Chat = () => {
     >
       <Messages />
       <TextField
+        value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         variant="outlined"
         placeholder="Запрос"
